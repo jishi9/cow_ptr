@@ -5,7 +5,7 @@ Copy-on-write pointer for C++
 
 Basic usage
 ===========
-    cow_ptr<int> cp(new int(0), false);
+    cow_ptr<int> cp(new int(0));
     (*cp)++;
     (*cp)++;
     // *cp == 2
