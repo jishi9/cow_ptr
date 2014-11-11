@@ -12,14 +12,16 @@ class cow_ptr {
     shared_ptr<T> pointee_;
 
   public:
+    cow_ptr() {}
+
     cow_ptr(T* pointee) : cow_ptr(pointee, true) {}
 
-    cow_ptr(T* pointee, bool takeOwnership) {
+    cow_ptr(T* raw_pointer, bool takeOwnership) {
         if (takeOwnership) {
-            pointee_ = shared_ptr<T>(pointee_);
+            pointee_ = shared_ptr<T>(raw_pointer);
         } else {
             // share_ptr's aliasing constructor
-            pointee_ = shared_ptr<T>(shared_ptr<T>(), pointee);
+            pointee_ = shared_ptr<T>(shared_ptr<T>(), raw_pointer);
         }
     }
 
@@ -30,20 +32,19 @@ class cow_ptr {
     }
 
     const T* operator->() const {
-        return &(*this);
+        return &(**this);
     }
 
     T& operator*() {
         // If pointee_ is established to be unique, then we can rely on this fact
         // not changing
         if (!pointee_.unique()) {
-            shared_ptr<T> copy = make_shared<T>(*pointee_);
-            std::swap(pointee_, copy);
+            pointee_ = shared_ptr<T>(new T(*pointee_));
         }
         return *pointee_;
     }
 
     T* operator->() {
-        return &(*this);
+        return &(**this);
     }
 };
